@@ -1,0 +1,20 @@
+#ifndef DESIGN_AND_ANALYSIS_OF_ALGORITHMS_BINARYTREE_H
+#define DESIGN_AND_ANALYSIS_OF_ALGORITHMS_BINARYTREE_H
+
+#include "node.hpp"
+
+class BinaryTree {
+	public:
+	virtual node* left(node*) = 0;
+	virtual node* right(node*) = 0;
+	virtual void zigleft(node*) = 0;
+	virtual void zigright(node*) = 0;
+	virtual node* addRoot(int e) = 0;
+	virtual node* addLeft(node* p, int e) = 0;
+	virtual node* addRight(node* p, int e) = 0;
+	virtual int remove(node*) = 0;
+	virtual node* getRoot() = 0;
+	virtual void print() = 0;
+};
+
+#endif //DESIGN_AND_ANALYSIS_OF_ALGORITHMS_BINARYTREE_H
