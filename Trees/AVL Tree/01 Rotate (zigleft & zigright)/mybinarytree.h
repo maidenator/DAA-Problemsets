@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "binarytree.hpp"
+#include "node.h"
 using namespace std;
 
 class MyBinaryTree : public BinaryTree {
@@ -114,6 +115,14 @@ class MyBinaryTree : public BinaryTree {
 		return root;
 	}
 
+	void transplant(node* x, node* y) {
+		if (!x->parent) root = y;
+		else (x->parent->left == x) ? x->parent->left : x->parent->right = y;
+
+		if (y)
+			y->parent = x->parent;
+	}
+
     // TODO implement zigleft
     // params: curr - the right child that will be rotated with its parent
     // after which, curr shall be above its parent
@@ -123,13 +132,8 @@ class MyBinaryTree : public BinaryTree {
     //    x <- curr
     void zigleft(node* x) {
         node* y = x->parent;
-        node* z = y->parent;
 
-        //GP
-        x->parent = z;
-        if(!z) root = x;
-        else if(z->left == y) z->left = x;
-        else z->right = x;
+		transplant(x, y);
 
         //YR XL
         y->right = x->left;
@@ -149,13 +153,8 @@ class MyBinaryTree : public BinaryTree {
     // x <- curr
     void zigright(node* x) {
         node* y = x->parent;
-        node* z = y->parent;
 
-        //GP
-        x->parent = z;
-        if(!z) root = x;
-        else if(z->left == y) z->left = x;
-        else z->right = x;
+		transplant(x, y);
 
         //YR XL
         y->left = x->right;
