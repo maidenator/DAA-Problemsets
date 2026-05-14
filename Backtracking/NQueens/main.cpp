@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+
 using namespace std;
 
 //Global counter for solutions
@@ -17,29 +18,30 @@ void printBoard(vector<vector<int>> &board) {
 }
 
 bool checkQueenPlacement(vector<vector<int>> &board, int row, int col) {
-    for (int i = 0; i < row; i++)
+    for (int i = 0; i < board.size(); i++)
         if (board[i][col] == 1) return false;
 
-    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--)
-        if (board[i][j] == 1 ) return false;
+    for (int i = row, j = col; i >= 0 && j>= 0; i--, j--)
+        if (board[i][j] == 1) return false;
 
     for (int i = row, j = col; i >= 0 && j < board.size(); i--, j++)
-        if (board[i][j] == 1 ) return false;
+        if (board[i][j] == 1) return false;
 
     return true;
 }
 
 void solve(vector<vector<int>> &board, int row) {
-    if (row == board.size()) {
-        //If problem asks just for 1 solution change solve to a bool and return true here xd
-        count++;
-        printBoard(board);
-    }
+   if (row == board.size()) {
+       count++;
+       printBoard(board);
+       return;
+   }
+
     for (int i = 0; i < board.size(); i++) {
         if (checkQueenPlacement(board, row, i)) {
-            board[row][i] = 1; //Place queen
+            board[row][i] = 1;
             solve(board, row + 1);
-            board[row][i] = 0; //Backtrack
+            board[row][i] = 0;
         }
     }
 }
@@ -50,5 +52,5 @@ int main() {
     cin >> size;
     vector<vector<int>> board(size, vector<int>(size, 0));
     solve(board, 0);
-    cout << "Solutions found " << count;
+    cout << "Solutions found: " << count;
 }

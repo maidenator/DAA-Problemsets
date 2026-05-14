@@ -71,7 +71,7 @@ bool solveSudoku(int grid[N][N]) {
                 grid[row][col] = 0; //Backtrack
         }
     }
-
+ 
     //Board is not solvable
     return false;
 }
