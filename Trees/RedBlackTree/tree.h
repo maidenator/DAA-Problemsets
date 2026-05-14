@@ -224,7 +224,7 @@ public:
         }
     }
 
-    bool remove_node(int num) {
+    bool remove(int num) {
         node* rem = search_node(root, num);
         if (!rem || rem->element != num) return false; // Not found
 

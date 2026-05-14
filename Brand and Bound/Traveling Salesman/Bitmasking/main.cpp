@@ -11,10 +11,7 @@ void solve(int mask, int pos, int cost) {
     if(cost >= min_cost) return;
     
     if(mask == (1 << n) - 1) {
-        int final_path = cost + graph[pos][0];
-        if(final_path < min_cost) 
-            min_cost = final_path;
-        
+        min_cost = min(min_cost, cost + graph[pos][0]);
         return;
     }
     

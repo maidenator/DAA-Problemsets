@@ -1,36 +1,28 @@
 #include <iostream>
+#include <vector>
 #include <algorithm>
 using namespace std;
 
-struct Item {
-    int value;
-    int weight;
-    float ratio;
-};
+double calculateKnapsack(const vector<int>& values, const vector<int>& weight, int size, int cap) {
+    if (size == 0 || cap == 0) return 0;
 
-double calculateKnapsack(int * values, int * weight, int size, int cap) {
-    if (size == 0 || cap == 0) return -1;
+    // Create an array of indices [0, 1, 2... size-1]
+    vector<int> idx(size);
+    for (int i = 0; i < size; i++) idx[i] = i;
 
-    Item* items = new Item[size];
-    for (int i = 0; i < size; i++) {
-        items[i].value = values[i];
-        items[i].weight = weight[i];
-        items[i].ratio = (float)values[i] / (float)weight[i];
-    }
-
-    //std sort abuse
-    sort(items, items + size, [](Item a, Item b) {return a.ratio > b.ratio;});
+    // std::sort abuse: Sort the indices based on the value/weight ratio
+    sort(idx.begin(), idx.end(), [&](int a, int b) {return (double)values[a] / weight[a] > (double)values[b] / weight[b];});
 
     double totalValue = 0;
-    int currentWeight = 0;
 
-    for (int i = 0; i < size; i++) {
-        if (currentWeight + items[i].weight <= cap) {
-            currentWeight += items[i].weight;
-            totalValue += items[i].value;
+    // Iterate through our sorted indices
+    for (int i : idx) {
+        if (weight[i] <= cap) {
+            cap -= weight[i];
+            totalValue += values[i];
         } else {
-            int remaining = cap - currentWeight;
-            totalValue += items[i].value * ((double)remaining / items[i].weight);
+            // Take the fractional remainder and break
+            totalValue += values[i] * ((double)cap / weight[i]);
             break;
         }
     }
@@ -38,18 +30,22 @@ double calculateKnapsack(int * values, int * weight, int size, int cap) {
 }
 
 int main() {
-    int size;
-    cout << "Enter the number of items:";
+    int size, cap;
+    cout << "Enter the number of items: ";
     cin >> size;
-    int* items = new int[size];
-    int* weight = new int[size];
+
+    // Using vectors prevents the memory leak from 'new int[]'
+    vector<int> values(size), weight(size);
     cout << "Enter the value of the item and its corresponding weight:\n\n";
     for (int i = 0; i < size; i++) {
-        cin >> items[i] >> weight[i];
+        cin >> values[i] >> weight[i];
     }
-    int cap;
+
     cout << "Enter the capacity of the knapsack:\n";
     cin >> cap;
-    double res = calculateKnapsack(items, weight, size, cap);
-    cout << "Res: " << res;
+
+    double res = calculateKnapsack(values, weight, size, cap);
+    cout << "Res: " << res << "\n";
+
+    return 0;
 }
