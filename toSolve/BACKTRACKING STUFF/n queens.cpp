@@ -4,6 +4,17 @@ using namespace std;
 int n, solCount = 0;
 int board[20]; // board[row] = column_index
 
+void printBoard() {
+    cout<<"Solution found:\n";
+    for (int r = 0; r < n; r++) {
+        for (int c = 0; c < n; c++) {
+            cout<<(board[r] == c ? "Q " : ". ");
+        }
+        cout<<"\n";
+    }
+    cout<<"\n";
+}
+
 bool isSafe(int r, int c) {
     for (int i = 0; i < r; i++) {
         // Check column and diagonals
@@ -15,7 +26,8 @@ bool isSafe(int r, int c) {
 
 void solve(int r) {
     if (r == n) {
-        solCount++; // Or printBoard here
+        printBoard();
+        solCount++;
         return;
     }
     for (int c = 0; c < n; c++) {

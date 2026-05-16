@@ -1,27 +1,26 @@
 #include <iostream>
+#include <cstring> // For memset
 using namespace std;
 
 int n, edges;
 int graph[20][20] = {0};
-bool found = false;
+int dp[1 << 20][20]; // Bitmask state cache: dp[visited_mask][current_node]
 
-// No isSafe function needed because logic is inside the loop
-void solve(int mask, int pos) {
-    cout << "Visiting Node: " << pos << " | Visited Mask: " << mask << "\n";
-    if (found) return;
+bool solve(int mask, int pos) {
+    // Base Case: If all nodes are visited, check if an edge exists back to start (node 0)
+    if (mask == (1 << n) - 1) return graph[pos][0];
 
-    if (mask == (1 << n) - 1) {
-        if (graph[pos][0]) found = true; // Return to start
-        return;
-    }
+    // Memory Guard: If this exact state was already evaluated, return the cached result
+    if (dp[mask][pos] != -1) return dp[mask][pos];
 
     for (int i = 0; i < n; i++) {
-        // Check: Edge exists AND not visited
+        // If edge exists and node 'i' has not been visited yet
         if (graph[pos][i] && !(mask & (1 << i))) {
-            solve(mask | (1 << i), i); // Recurse
-            // No backtrack needed for mask because it's passed by value!
+            if (solve(mask | (1 << i), i))
+                return dp[mask][pos] = 1; // Cache success path and return
         }
     }
+    return dp[mask][pos] = 0; // Cache failure path if no cycles originate from here
 }
 
 int main() {
@@ -30,8 +29,13 @@ int main() {
         cin >> u >> v;
         graph[u][v] = graph[v][u] = 1;
     }
-    solve(1, 0); // Start at node 0 with mask 1
-    if (found) cout << "Cycle Exists!";
+
+    // One-line initialization: Fill cache table with -1 (representing unvisited states)
+    memset(dp, -1, sizeof(dp));
+    for (int i = 0; i < 20; i++) {
+        cout << dp[i][0] << " ";
+    }
+    if (solve(1, 0)) cout << "Cycle Exists!";
     else cout << "No Cycle";
     return 0;
 }

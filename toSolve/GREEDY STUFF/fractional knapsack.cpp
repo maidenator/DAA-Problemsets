@@ -11,13 +11,7 @@ double calculateKnapsack(const vector<int>& values, const vector<int>& weight, i
     for (int i = 0; i < size; i++) idx[i] = i;
 
     // 2. Sort indices by Value/Weight Ratio
-    sort(idx.begin(), idx.end(),
-        [&](int a, int b)
-        {
-        return (double)values[a] / weight[a] > (double)values[b] / weight[b];
-        }
-    );
-
+    sort(idx.begin(), idx.end(), [&](int a, int b){ return values[a] * weight[b] > values[b] * weight[a]; });
     double totalValue = 0;
 
     // 3. Greedy Process
