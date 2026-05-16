@@ -7,6 +7,7 @@ bool found = false;
 
 // No isSafe function needed because logic is inside the loop
 void solve(int mask, int pos) {
+    cout << "Visiting Node: " << pos << " | Visited Mask: " << mask << "\n";
     if (found) return;
 
     if (mask == (1 << n) - 1) {

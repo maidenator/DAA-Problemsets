@@ -11,9 +11,12 @@ double calculateJobScheduling(const vector<int>& profits, const vector<int>& dea
     for (int i = 0; i < size; i++) idx[i] = i;
 
     // 2. Sort indices by Profit descending
-    sort(idx.begin(), idx.end(), [&](int a, int b) {
+    sort(idx.begin(), idx.end(),
+        [&](int a, int b)
+        {
         return profits[a] > profits[b];
-    });
+        }
+    );
 
     // Use 'cap' as the number of available time slots
     vector<bool> slots(cap, false);
