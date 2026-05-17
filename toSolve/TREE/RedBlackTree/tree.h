@@ -14,6 +14,7 @@
             n->parent = parent;
             n->is_red = true;
             n->left = n->right = nullptr;
+            size++;
             return n;
         }
 
@@ -117,7 +118,7 @@
                     cout << "DELETION Violation: Case 3\n";
                     parent->is_red = true;
                     sibling->is_red = false;
-                    restructure(sibling, false);
+                    is_left ? zigleft(sibling) : zigright(sibling);
                     sibling = is_left ? parent->right : parent->left;
                 }
 
@@ -134,8 +135,8 @@
                         near->is_red = false;
                         sibling->is_red = true;
 
-                        is_left ? zigright(near) : zigleft(near);
                         cout << (is_left? "ZIGRIGHT\n" : "ZIGLEFT\n");
+                        is_left ? zigright(near) : zigleft(near);
 
                         sibling = is_left ? parent->right : parent->left;
                         far = is_left ? sibling->right : sibling->left;
@@ -145,7 +146,8 @@
                     parent->is_red = false;
                     if (far) far->is_red = false;
 
-                    restructure(sibling, true);
+                    cout << (is_left ? "ZIGLEFT\n" : "ZIGRIGHT\n");
+                    is_left ? zigleft(sibling) : zigright(sibling);
                     curr = root;
                 }
             }
@@ -164,7 +166,6 @@
             if (!root) {
                 root = create_node(num, nullptr);
                 root->is_red = false;
-                size++;
                 return true;
             }
 
@@ -173,7 +174,6 @@
             node* parent = search_node(num, root);
             node* newNode = create_node(num, parent);
             (num < parent->element ? parent->left : parent->right) = newNode;
-            size++;
 
             while (newNode != root && isRed(newNode) && isRed(parent)) {
                 node* uncle = uncleOf(newNode);
@@ -214,13 +214,13 @@
             }
 
             node* ch = (rem->left) ? rem->left : rem->right;
-            bool was_black = isRed(rem);
+            bool was_black = !isRed(rem);
 
             if (was_black && !ch) deleteFix(rem);
             transplant(rem, ch);
             if (was_black && ch) deleteFix(ch);
 
-            delete rem;
+            free(rem);
             size--;
             return true;
         }

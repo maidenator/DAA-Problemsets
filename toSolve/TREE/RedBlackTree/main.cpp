@@ -1,5 +1,6 @@
 #include "tree.h"
 #include <iostream>
+
 using namespace std;
 int main() {
     BSTree* tree = new BSTree();
