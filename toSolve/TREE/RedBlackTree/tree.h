@@ -118,41 +118,33 @@
                     cout << "DELETION Violation: Case 3\n";
                     parent->is_red = true;
                     sibling->is_red = false;
-                    is_left ? zigleft(sibling) : zigright(sibling); //Sibling replaces parent
+                    is_left ? zigleft(sibling) : zigright(sibling);
                     sibling = is_left ? parent->right : parent->left;
                 }
-
+                //Get nephews
                 node* near = is_left ? sibling->left : sibling->right;
                 node* far = is_left ? sibling->right : sibling->left;
 
                 if (!isRed(near) && !isRed(far)) {
                     cout << "DELETION Violation: Case 2\n";
                     sibling->is_red = true;
-                    curr = parent;
-                } else {
+                    curr = parent; //Push double black UP
+                }
+
+                else {
                     cout << "DELETION Violation: Case 1\n";
-                    if (!isRed(far)) {
-                        near->is_red = false;
-                        sibling->is_red = true;
-
-                        cout << (is_left? "ZIGRIGHT\n" : "ZIGLEFT\n");
-                        is_left ? zigright(near) : zigleft(near);
-
-                        far = is_left ? sibling->right : sibling->left;
-                        sibling = is_left ? parent->right : parent->left;
-                    }
-
-                    sibling->is_red = parent->is_red;
-                    parent->is_red = false;
-                    if (far) far->is_red = false;
-
-                    cout << (is_left ? "ZIGLEFT\n" : "ZIGRIGHT\n");
-                    is_left ? zigleft(sibling) : zigright(sibling);
+                    node* red_child = isRed(far) ? far : near;
+                    bool old_parent_color = parent->is_red;
+                    node* new_root = restructure(red_child, true);
+                    new_root->is_red = old_parent_color;
+                    if (new_root->left)  new_root->left->is_red = false;
+                    if (new_root->right) new_root->right->is_red = false;
                     curr = root;
                 }
             }
             if (curr) curr->is_red = false;
         }
+
 
     public:
         BSTree() {}
@@ -226,14 +218,18 @@
         }
 
 
+
         // This function is the same remove function that apppeared during our SPLAY Tree activity
         // If ever this function is given to us by default during the exam, all we have to do is:
 
-        // MAKE 2 CALLS TO deleteFix IF REM NODE IS NOT RED:
+        // 1. MOVE `node* parent` DELCARATIONS **AFTER** CALLING DELETE FIX
+        // 2. MAKE 2 CALLS TO deleteFix IF REM NODE IS NOT RED:
             // Call in 0 children:
                 // 1. if(!isRed(rem_node)) deleteFix(rem_node);
             // Call in 1 child:
                 // 2. if(!isRed(rem_node)) deleteFix(child);
+
+        //RULE OF THUMB: We call deleteFix BEFORE GETTING THE PARENT
 
         // We do not need a call for a 2 child case because the 2 child
         // Because the 2 child case simply recurses and reduces the problem into a 1 child case
@@ -264,9 +260,8 @@
             }
 
             if (children == 0) { // NO CHILDREN
-                node* parent = rem_node->parent;
-
                 if (!isRed(rem_node)) deleteFix(rem_node); //CALL HERE
+                node* parent = rem_node->parent; //GET PARENT AFTER
 
                 if (!parent) {
                     root = NULL;
@@ -281,13 +276,16 @@
                 free(rem_node);
                 size--;
             } else if (children == -1 || children == 1) { // ONE CHILD
-                node* parent = rem_node->parent;
+                //node* parent = rem_node->parent; IMPORTANT: MOVE THIS
                 node* child;
                 if (children == -1) {
                     child = rem_node->left;
                 } else {
                     child = rem_node->right;
                 }
+
+                if (!isRed(rem_node)) deleteFix(child); //CALL HERE
+                node* parent = rem_node->parent; //TO HERE (GET PARENT AFTER)
 
                 child->parent = parent;
                 if (!parent) {
@@ -300,7 +298,6 @@
                     }
                 }
 
-                if (!isRed(rem_node)) deleteFix(child); //CALL HERE
 
                 free(rem_node);
                 size--;
