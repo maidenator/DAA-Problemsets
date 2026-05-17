@@ -26,13 +26,15 @@ class BST {
 		}
 	}
 
-    void postProcess(node* n) {
-        for(node* curr = n; curr; curr = curr->parent)
-            restructure(curr);
-    }
+
 
     // TODO perform post-processing by checking for violation after insertion
     // from the node inserted (or from its parent) until the root
+	void postProcess(node* n) {
+		for(node* curr = n; curr; curr = curr->parent)
+			restructure(curr);
+	}
+
 	node* insert(int num) {
         node* n = tree->getRoot();
         if (n == NULL) {

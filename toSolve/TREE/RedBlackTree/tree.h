@@ -8,7 +8,6 @@
         node* root = nullptr;
         int size = 0;
 
-        //UTILITIES:
         node* create_node(int num, node* parent) {
             node* n = (node*)malloc(sizeof(node));
             n->element = num;
@@ -18,14 +17,12 @@
             return n;
         }
 
-        //Returns the node that contains num, or the node closest to it
         node* search_node(int num, node* curr) {
             if (curr->element == num) return curr;
             node* next = (num < curr->element) ? curr->left : curr->right;
             return next ? search_node(num, next) : curr;
         }
 
-        //Replaces a node x with y
         void transplant(node* oldNode, node* newNode) {
             if (!oldNode->parent)
                 root = newNode;
@@ -74,30 +71,29 @@
             bool PR = (par->right == child);
             bool GR = (gp != nullptr && gp->right == par);
 
-            // NO GP
             if (!gp) {
                 if (print) cout << (PR ? "ZIGLEFT\n" : "ZIGRIGHT\n");
                 PR ? zigleft(child) : zigright(child);
                 return child;
             }
 
-            if (GR && PR) {             // RR
+            if (GR && PR) {
                 if (print) cout << "ZIGLEFT\n";
                 zigleft(par);
                 return par;
 
-            } if (!GR && !PR) {    // LL
+            } if (!GR && !PR) {
                 if (print) cout << "ZIGRIGHT\n";
                 zigright(par);
                 return par;
 
-            } if (GR && !PR) {     // RL
+            } if (GR && !PR) {
                 if (print) cout << "ZIGZAGLEFT\n";
                 zigright(child);
                 zigleft(child);
                 return child;
 
-            } else {                    // LR
+            } else {
                 if (print) cout << "ZIGZAGRIGHT\n";
                 zigleft(child);
                 zigright(child);
@@ -113,37 +109,27 @@
             node* curr = n;
 
             while (curr != root && !isRed(curr)) {
-                node* p = curr->parent;
-                bool is_left = curr == p->left;
+                node* parent = curr->parent;
+                bool is_left = parent->left == curr;
+                node* sibling = is_left? parent->right : parent->left;
 
-                // 1. Identify sibling based on our position
-                node* sibling = is_left ? p->right : p->left;
-
-                // CASE 3: Sibling is Red
                 if (isRed(sibling)) {
                     cout << "DELETION Violation: Case 3\n";
-                    p->is_red = true;
+                    parent->is_red = true;
                     sibling->is_red = false;
                     restructure(sibling, false);
-                    // The rotation changed the tree, so we MUST update the sibling pointer
-                    sibling = is_left ? p->right : p->left;
+                    sibling = is_left ? parent->right : parent->left;
                 }
 
-                // 2. Identify nephews based on our position
                 node* near = is_left ? sibling->left : sibling->right;
                 node* far = is_left ? sibling->right : sibling->left;
 
-                // CASE 2: Sibling is Black & black children: PUSH UP BLACKNESS
                 if (!isRed(near) && !isRed(far)) {
                     cout << "DELETION Violation: Case 2\n";
                     sibling->is_red = true;
-                    curr = p;
-                }
-
-                // CASE 1: Sibling is Black & 1 Red Nephew
-                else {
+                    curr = parent;
+                } else {
                     cout << "DELETION Violation: Case 1\n";
-                    // Subcase: Near Nephew is Red
                     if (!isRed(far)) {
                         near->is_red = false;
                         sibling->is_red = true;
@@ -151,20 +137,18 @@
                         is_left ? zigright(near) : zigleft(near);
                         cout << (is_left? "ZIGRIGHT\n" : "ZIGLEFT\n");
 
-                        // Update pointers after straightening
-                        sibling = is_left ? p->right : p->left;
+                        sibling = is_left ? parent->right : parent->left;
                         far = is_left ? sibling->right : sibling->left;
                     }
-                    // Subcase: Far Nephew is Red
-                    sibling->is_red = p->is_red;     // Sibling takes parent's color
-                    p->is_red = false;               // Parent becomes Black
-                    if (far) far->is_red = false;    // Far Nephew becomes Black
 
-                    restructure(sibling, true); // The final balancing rotation
-                    curr = root;                     // Force the loop to terminate
+                    sibling->is_red = parent->is_red;
+                    parent->is_red = false;
+                    if (far) far->is_red = false;
+
+                    restructure(sibling, true);
+                    curr = root;
                 }
             }
-            // Ensure the final node (or root) is Black
             if (curr) curr->is_red = false;
         }
 
@@ -172,11 +156,11 @@
         BSTree() {}
 
         bool search(int num) {
+            if (size == 0) return false;
             return search_node(num, root)->element == num;
         }
 
         bool insert(int num) {
-            //0. Check if !root
             if (!root) {
                 root = create_node(num, nullptr);
                 root->is_red = false;
@@ -184,20 +168,17 @@
                 return true;
             }
 
-            //1. Do not insert of node exists
             if (search_node(num, root)->element == num) return false;
 
-            //2. Insert to its rightful place
             node* parent = search_node(num, root);
             node* newNode = create_node(num, parent);
             (num < parent->element ? parent->left : parent->right) = newNode;
             size++;
 
-            //3. Check for violations
-            while (newNode != root && newNode->is_red && parent->is_red) {
+            while (newNode != root && isRed(newNode) && isRed(parent)) {
                 node* uncle = uncleOf(newNode);
 
-                if (uncle == nullptr || !uncle->is_red) {
+                if (!isRed(uncle)) {
                     cout << "UNCLE IS BLACK (RESTRUCTURE & RECOLOR)\n";
                     node* newParent = restructure(newNode, true);
                     newParent->is_red = false;
@@ -206,7 +187,7 @@
                     break;
                 }
 
-                if (uncle->is_red) {
+                if (isRed(uncle)) {
                     cout << "UNCLE IS RED (RECOLOR)\n";
                     uncle->is_red = false;
                     parent->is_red = false;
@@ -219,13 +200,12 @@
             return true;
         }
 
-        bool remove(int num) {
-            //0. ROOT
+        // This function was created in case we are not given a remove function during the exam
+        bool REMOVE(int num) {
             if (!root) return false;
             node* rem = search_node(num, root);
             if (!rem || rem->element != num) return false;
 
-            //1. 2-CHILD CASE
             if (rem->left && rem->right) {
                 node* suc = rem->right;
                 while (suc->left) suc = suc->left;
@@ -233,19 +213,107 @@
                 rem = suc;
             }
 
-            //2. 1-CHILD CASE
-            //2.1 child and rem's color
             node* ch = (rem->left) ? rem->left : rem->right;
-            bool was_black = !rem->is_red;
+            bool was_black = isRed(rem);
 
-            //2.2 no ch? fix rem t(r,c) yes ch? fix ch
             if (was_black && !ch) deleteFix(rem);
             transplant(rem, ch);
             if (was_black && ch) deleteFix(ch);
 
-            //3. DELETE
             delete rem;
             size--;
+            return true;
+        }
+
+
+        // This function is the same remove function that apppeared during our SPLAY Tree activity
+        // If ever this function is given to us by default during the exam, all we have to do is:
+
+        // MAKE 2 CALLS TO deleteFix IF REM NODE IS NOT RED:
+            // Call in 0 children:
+                // 1. if(!isRed(rem_node)) deleteFix(rem_node);
+            // Call in 1 child:
+                // 2. if(!isRed(rem_node)) deleteFix(child);
+
+        // We do not need a call for a 2 child case because the 2 child
+        // Because the 2 child case simply recurses and reduces the problem into a 1 child case
+        bool remove(int num) {
+            if (isEmpty()) {
+                return false;
+            }
+            node* rem_node = search_node(num, root);
+            if (rem_node->element != num) {
+                return false;
+            }
+
+            // FIND the number of children.
+            int children = 0;
+            // 0 - no children
+            // -1 - left child only
+            // 1 - right child only
+            // 2 - both children
+            if (rem_node->right) {
+                children = 1;
+            }
+            if (rem_node->left) {
+                if (children == 1) {
+                    children = 2;
+                } else {
+                    children = -1;
+                }
+            }
+
+            if (children == 0) { // NO CHILDREN
+                node* parent = rem_node->parent;
+
+                if (!isRed(rem_node)) deleteFix(rem_node); //CALL HERE
+
+                if (!parent) {
+                    root = NULL;
+                } else {
+                    if (rem_node == parent->left) {
+                        parent->left = NULL;
+                    } else {
+                        parent->right = NULL;
+                    }
+                }
+
+                free(rem_node);
+                size--;
+            } else if (children == -1 || children == 1) { // ONE CHILD
+                node* parent = rem_node->parent;
+                node* child;
+                if (children == -1) {
+                    child = rem_node->left;
+                } else {
+                    child = rem_node->right;
+                }
+
+                child->parent = parent;
+                if (!parent) {
+                    root = child;
+                } else {
+                    if (parent->left == rem_node) {
+                        parent->left = child;
+                    } else {
+                        parent->right = child;
+                    }
+                }
+
+                if (!isRed(rem_node)) deleteFix(child); //CALL HERE
+
+                free(rem_node);
+                size--;
+            } else { // TWO CHILDREN
+                node* right_st = rem_node->right;
+                while (right_st->left != NULL) {
+                    right_st = right_st->left;
+                }
+
+                int temp = right_st->element;
+                remove(temp);
+                rem_node->element = temp;
+            }
             return true;
         }
 

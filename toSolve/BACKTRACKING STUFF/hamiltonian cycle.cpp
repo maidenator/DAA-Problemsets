@@ -1,41 +1,50 @@
 #include <iostream>
-#include <cstring> // For memset
 using namespace std;
 
 int n, edges;
 int graph[20][20] = {0};
-int dp[1 << 20][20]; // Bitmask state cache: dp[visited_mask][current_node]
+bool visited[20] = {false};
 
-bool solve(int mask, int pos) {
-    // Base Case: If all nodes are visited, check if an edge exists back to start (node 0)
-    if (mask == (1 << n) - 1) return graph[pos][0];
-
-    // Memory Guard: If this exact state was already evaluated, return the cached result
-    if (dp[mask][pos] != -1) return dp[mask][pos];
-
+bool solve(int pos, int count) {
+    // Base Case: If we have visited all 'n' nodes
+    if (count == n) {
+        // Check if there is an edge back to the starting node (0)
+        return graph[pos][0];
+    }
+    // Try going to every other node
     for (int i = 0; i < n; i++) {
-        // If edge exists and node 'i' has not been visited yet
-        if (graph[pos][i] && !(mask & (1 << i))) {
-            if (solve(mask | (1 << i), i))
-                return dp[mask][pos] = 1; // Cache success path and return
+        // If there is an edge AND the node 'i' hasn't been visited yet
+        if (graph[pos][i] && !visited[i]) {
+            // 1. CHOOSE: Mark the node as visited
+            visited[i] = true;
+            // 2. EXPLORE: Recurse to the next node and increment our visited count
+            if (solve(i, count + 1)) {
+                return true; // We found a valid cycle! Pass it up the chain.
+            }
+            // 3. UN-CHOOSE (Backtrack): If that path failed, un-mark it so other paths can try using it
+            visited[i] = false;
         }
     }
-    return dp[mask][pos] = 0; // Cache failure path if no cycles originate from here
+    // If we tried all neighbors and none worked, return false
+    return false;
 }
 
 int main() {
-    cout << "N, Edges: "; cin >> n >> edges;
+    cout << "N, Edges: ";
+    cin >> n >> edges;
     for (int i = 0, u, v; i < edges; i++) {
         cin >> u >> v;
         graph[u][v] = graph[v][u] = 1;
     }
 
-    // One-line initialization: Fill cache table with -1 (representing unvisited states)
-    memset(dp, -1, sizeof(dp));
-    for (int i = 0; i < 20; i++) {
-        cout << dp[i][0] << " ";
+    // Setup the starting conditions for node 0
+    visited[0] = true;
+
+    // Start at node 0, with a visited count of 1
+    if (solve(0, 1)) {
+        cout << "Cycle Exists!";
+    } else {
+        cout << "No Cycle";
     }
-    if (solve(1, 0)) cout << "Cycle Exists!";
-    else cout << "No Cycle";
     return 0;
 }

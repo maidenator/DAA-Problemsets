@@ -1,7 +1,7 @@
 #include <iostream>
 using namespace std;
 
-bool dp_ss[10001]; // Global: dp[sum] = true/false
+bool dp_ss[10001];
 int nums[1001];
 
 void solveSubsetSum(int n, int target) {
@@ -13,7 +13,8 @@ void solveSubsetSum(int n, int target) {
         int x = nums[i];
         // BACKWARD loop is the key for 1D Subset Sum/Knapsack
         for (int j = target; j >= x; j--) {
-            if (dp_ss[j - x]) dp_ss[j] = true;
+            if (dp_ss[j - x])
+                dp_ss[j] = true;
         }
     }
 
