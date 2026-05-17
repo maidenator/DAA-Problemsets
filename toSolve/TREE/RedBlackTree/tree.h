@@ -118,7 +118,7 @@
                     cout << "DELETION Violation: Case 3\n";
                     parent->is_red = true;
                     sibling->is_red = false;
-                    is_left ? zigleft(sibling) : zigright(sibling);
+                    is_left ? zigleft(sibling) : zigright(sibling); //Sibling replaces parent
                     sibling = is_left ? parent->right : parent->left;
                 }
 
@@ -138,8 +138,8 @@
                         cout << (is_left? "ZIGRIGHT\n" : "ZIGLEFT\n");
                         is_left ? zigright(near) : zigleft(near);
 
-                        sibling = is_left ? parent->right : parent->left;
                         far = is_left ? sibling->right : sibling->left;
+                        sibling = is_left ? parent->right : parent->left;
                     }
 
                     sibling->is_red = parent->is_red;

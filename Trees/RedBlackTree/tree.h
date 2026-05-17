@@ -117,7 +117,7 @@
                     cout << "DELETION Violation: Case 3\n";
                     parent->is_red = true;
                     sibling->is_red = false;
-                    restructure(sibling, false);
+                    is_left ? zigleft(sibling) : zigright(sibling);
                     sibling = is_left ? parent->right : parent->left;
                 }
 
@@ -134,18 +134,19 @@
                         near->is_red = false;
                         sibling->is_red = true;
 
-                        is_left ? zigright(near) : zigleft(near);
                         cout << (is_left? "ZIGRIGHT\n" : "ZIGLEFT\n");
+                        is_left ? zigright(near) : zigleft(near);
 
-                        sibling = is_left ? parent->right : parent->left;
                         far = is_left ? sibling->right : sibling->left;
+                        sibling = is_left ? parent->right : parent->left;
                     }
 
                     sibling->is_red = parent->is_red;
                     parent->is_red = false;
                     if (far) far->is_red = false;
 
-                    restructure(sibling, true);
+                    cout << (is_left ? "ZIGLEFT\n" : "ZIGRIGHT\n");
+                    is_left ? zigleft(sibling) : zigright(sibling);
                     curr = root;
                 }
             }
